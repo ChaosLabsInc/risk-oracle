@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CC0
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -65,7 +65,7 @@ contract RiskOracle is Ownable {
      * @notice Adds a new sender to the list of addresses authorized to perform updates.
      * @param sender Address to be authorized.
      */
-    function addAuthorizedSender(address sender) public onlyOwner {
+    function addAuthorizedSender(address sender) external onlyOwner {
         require(!authorizedSenders[sender], "Sender already authorized.");
         authorizedSenders[sender] = true;
     }
@@ -74,7 +74,7 @@ contract RiskOracle is Ownable {
      * @notice Removes an address from the list of authorized senders.
      * @param sender Address to be unauthorized.
      */
-    function removeAuthorizedSender(address sender) public onlyOwner {
+    function removeAuthorizedSender(address sender) external onlyOwner {
         require(authorizedSenders[sender], "Sender not authorized.");
         authorizedSenders[sender] = false;
     }
@@ -83,7 +83,7 @@ contract RiskOracle is Ownable {
      * @notice Adds a new type of update to the list of authorized update types.
      * @param newUpdateType New type of update to allow.
      */
-    function addUpdateType(string memory newUpdateType) public onlyOwner {
+    function addUpdateType(string memory newUpdateType) external onlyOwner {
         require(
             !validUpdateTypes[newUpdateType],
             "Update type already exists."
@@ -103,7 +103,7 @@ contract RiskOracle is Ownable {
         bytes memory newValue,
         string memory typeOfUpdate,
         bytes memory market
-    ) public onlyAuthorized {
+    ) external onlyAuthorized {
         require(validUpdateTypes[typeOfUpdate], "Unauthorized update type.");
         _processUpdate(referenceId, newValue, typeOfUpdate, market);
     }
@@ -119,7 +119,7 @@ contract RiskOracle is Ownable {
         bytes[] memory newValues,
         string[] memory typesOfUpdates,
         bytes[] memory markets
-    ) public onlyAuthorized {
+    ) external onlyAuthorized {
         require(
             referenceIds.length == newValues.length &&
                 newValues.length == typesOfUpdates.length,
@@ -181,7 +181,7 @@ contract RiskOracle is Ownable {
      */
     function fetchUpdateDetails(
         uint256 updateId
-    ) public view returns (RiskParameterUpdate memory) {
+    ) external view returns (RiskParameterUpdate memory) {
         require(
             updateId > 0 && updateId <= updateCounter,
             "Invalid or non-existing update ID"
@@ -196,7 +196,7 @@ contract RiskOracle is Ownable {
      */
     function getLatestUpdateByType(
         string memory updateType
-    ) public view returns (RiskParameterUpdate memory) {
+    ) external view returns (RiskParameterUpdate memory) {
         require(
             validUpdateTypes[updateType],
             "Invalid or unauthorized update type."
@@ -227,7 +227,7 @@ contract RiskOracle is Ownable {
     function getLatestUpdateByParameterAndMarket(
         string memory updateType,
         bytes memory market
-    ) public view returns (RiskParameterUpdate memory) {
+    ) external view returns (RiskParameterUpdate memory) {
         for (int256 i = int256(updateHistory.length) - 1; i >= 0; i--) {
             RiskParameterUpdate storage update = updateHistory[uint256(i)];
             if (
@@ -248,7 +248,7 @@ contract RiskOracle is Ownable {
      */
     function getUpdateById(
         uint256 updateId
-    ) public view returns (RiskParameterUpdate memory) {
+    ) external view returns (RiskParameterUpdate memory) {
         require(
             updateId > 0 && updateId <= updateCounter,
             "Invalid update ID."
@@ -261,7 +261,7 @@ contract RiskOracle is Ownable {
      * @param sender Address to check.
      * @return Boolean indicating whether the address is authorized.
      */
-    function isAuthorized(address sender) public view returns (bool) {
+    function isAuthorized(address sender) external view returns (bool) {
         return authorizedSenders[sender];
     }
 }
