@@ -1,67 +1,18 @@
-## Foundry
+# Risk Oracle Smart Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This project contains a dynamic risk oracle implemented as a smart contract in Solidity.
 
-Foundry consists of:
+## Features
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- **Owner management**: Add or remove authorized senders.
+- **Update handling**: Publish and manage risk parameter updates.
 
-## Documentation
+## Installation
 
-https://book.getfoundry.sh/
+Clone the repository and install dependencies:
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```bash
+git clone https://github.com/USERNAME/RiskOracleProject.git
+cd RiskOracleProject
+forge install
 ```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
-# riskoracle
