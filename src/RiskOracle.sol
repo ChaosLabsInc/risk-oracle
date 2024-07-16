@@ -35,10 +35,7 @@ contract RiskOracle is Ownable {
     );
 
     modifier onlyAuthorized() {
-        require(
-            authorizedSenders[msg.sender],
-            "Unauthorized: Sender not authorized."
-        );
+        require(authorizedSenders[msg.sender], "Unauthorized: Sender not authorized.");
         _;
     }
 
@@ -47,10 +44,7 @@ contract RiskOracle is Ownable {
      * @param initialSenders List of addresses that will initially be authorized to perform updates.
      * @param initialUpdateTypes List of valid update types initially allowed.
      */
-    constructor(
-        address[] memory initialSenders,
-        string[] memory initialUpdateTypes
-    ) Ownable(msg.sender) {
+    constructor(address[] memory initialSenders, string[] memory initialUpdateTypes) Ownable(msg.sender) {
         for (uint256 i = 0; i < initialSenders.length; i++) {
             authorizedSenders[initialSenders[i]] = true; // Automatically authorize initial senders
         }
@@ -84,10 +78,7 @@ contract RiskOracle is Ownable {
      * @param newUpdateType New type of update to allow.
      */
     function addUpdateType(string memory newUpdateType) external onlyOwner {
-        require(
-            !validUpdateTypes[newUpdateType],
-            "Update type already exists."
-        );
+        require(!validUpdateTypes[newUpdateType], "Update type already exists.");
         validUpdateTypes[newUpdateType] = true;
         allUpdateTypes.push(newUpdateType);
     }
@@ -121,21 +112,12 @@ contract RiskOracle is Ownable {
         bytes[] memory markets
     ) external onlyAuthorized {
         require(
-            referenceIds.length == newValues.length &&
-                newValues.length == typesOfUpdates.length,
+            referenceIds.length == newValues.length && newValues.length == typesOfUpdates.length,
             "Mismatch between argument array lengths."
         );
         for (uint256 i = 0; i < referenceIds.length; i++) {
-            require(
-                validUpdateTypes[typesOfUpdates[i]],
-                "Unauthorized update type at index"
-            );
-            _processUpdate(
-                referenceIds[i],
-                newValues[i],
-                typesOfUpdates[i],
-                markets[i]
-            );
+            require(validUpdateTypes[typesOfUpdates[i]], "Unauthorized update type at index");
+            _processUpdate(referenceIds[i], newValues[i], typesOfUpdates[i], markets[i]);
         }
     }
 
@@ -149,28 +131,14 @@ contract RiskOracle is Ownable {
         bytes memory market
     ) internal {
         updateCounter++;
-        bytes memory previousValue = updateCounter > 0
-            ? updatesById[updateCounter - 1].parameter
-            : bytes("");
+        bytes memory previousValue = updateCounter > 0 ? updatesById[updateCounter - 1].parameter : bytes("");
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
-            block.timestamp,
-            newValue,
-            referenceId,
-            previousValue,
-            typeOfUpdate,
-            updateCounter,
-            market
+            block.timestamp, newValue, referenceId, previousValue, typeOfUpdate, updateCounter, market
         );
         updatesById[updateCounter] = newUpdate;
         updateHistory.push(newUpdate);
         emit ParameterUpdated(
-            referenceId,
-            newValue,
-            previousValue,
-            block.timestamp,
-            typeOfUpdate,
-            updateCounter,
-            market
+            referenceId, newValue, previousValue, block.timestamp, typeOfUpdate, updateCounter, market
         );
     }
 
@@ -179,13 +147,8 @@ contract RiskOracle is Ownable {
      * @param updateId ID of the update to retrieve.
      * @return RiskParameterUpdate structure with all details of the update.
      */
-    function fetchUpdateDetails(
-        uint256 updateId
-    ) external view returns (RiskParameterUpdate memory) {
-        require(
-            updateId > 0 && updateId <= updateCounter,
-            "Invalid or non-existing update ID"
-        );
+    function fetchUpdateDetails(uint256 updateId) external view returns (RiskParameterUpdate memory) {
+        require(updateId > 0 && updateId <= updateCounter, "Invalid or non-existing update ID");
         return updatesById[updateId];
     }
 
@@ -194,19 +157,12 @@ contract RiskOracle is Ownable {
      * @param updateType The specific type of update to retrieve.
      * @return The most recent RiskParameterUpdate of the specified type.
      */
-    function getLatestUpdateByType(
-        string memory updateType
-    ) external view returns (RiskParameterUpdate memory) {
-        require(
-            validUpdateTypes[updateType],
-            "Invalid or unauthorized update type."
-        );
+    function getLatestUpdateByType(string memory updateType) external view returns (RiskParameterUpdate memory) {
+        require(validUpdateTypes[updateType], "Invalid or unauthorized update type.");
 
         for (uint256 i = updateHistory.length; i > 0; i--) {
-            if (
-                keccak256(abi.encodePacked(updateHistory[i - 1].updateType)) ==
-                keccak256(abi.encodePacked(updateType))
-            ) {
+            if (keccak256(abi.encodePacked(updateHistory[i - 1].updateType)) == keccak256(abi.encodePacked(updateType)))
+            {
                 return updateHistory[i - 1];
             }
         }
@@ -224,16 +180,16 @@ contract RiskOracle is Ownable {
      * @param market The market identifier.
      * @return The most recent RiskParameterUpdate for the specified parameter and market.
      */
-    function getLatestUpdateByParameterAndMarket(
-        string memory updateType,
-        bytes memory market
-    ) external view returns (RiskParameterUpdate memory) {
+    function getLatestUpdateByParameterAndMarket(string memory updateType, bytes memory market)
+        external
+        view
+        returns (RiskParameterUpdate memory)
+    {
         for (int256 i = int256(updateHistory.length) - 1; i >= 0; i--) {
             RiskParameterUpdate storage update = updateHistory[uint256(i)];
             if (
-                keccak256(abi.encodePacked(update.updateType)) ==
-                keccak256(abi.encodePacked(updateType)) &&
-                keccak256(update.market) == keccak256(market)
+                keccak256(abi.encodePacked(update.updateType)) == keccak256(abi.encodePacked(updateType))
+                    && keccak256(update.market) == keccak256(market)
             ) {
                 return update;
             }
@@ -246,13 +202,8 @@ contract RiskOracle is Ownable {
      * @param updateId Update ID.
      * @return The most recent RiskParameterUpdate for the specified id.
      */
-    function getUpdateById(
-        uint256 updateId
-    ) external view returns (RiskParameterUpdate memory) {
-        require(
-            updateId > 0 && updateId <= updateCounter,
-            "Invalid update ID."
-        );
+    function getUpdateById(uint256 updateId) external view returns (RiskParameterUpdate memory) {
+        require(updateId > 0 && updateId <= updateCounter, "Invalid update ID.");
         return updatesById[updateId];
     }
 
