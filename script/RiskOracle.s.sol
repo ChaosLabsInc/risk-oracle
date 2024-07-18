@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.25;
 
 import "forge-std/Script.sol";
 import "../src/RiskOracle.sol";
@@ -16,7 +16,10 @@ contract RiskOracleScript is Script {
         initialUpdateTypes[0] = "Type1";
         initialUpdateTypes[1] = "Type2";
 
-        RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);
+        RiskOracle riskOracle = new RiskOracle(
+            initialSenders,
+            initialUpdateTypes
+        );
 
         vm.stopBroadcast();
     }
