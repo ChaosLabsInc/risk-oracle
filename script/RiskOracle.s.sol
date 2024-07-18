@@ -16,10 +16,7 @@ contract RiskOracleScript is Script {
         initialUpdateTypes[0] = "Type1";
         initialUpdateTypes[1] = "Type2";
 
-        RiskOracle riskOracle = new RiskOracle(
-            initialSenders,
-            initialUpdateTypes
-        );
+        RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);
 
         vm.stopBroadcast();
     }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol"; // Ensure the logger is included
@@ -53,10 +53,7 @@ contract RiskOracleTest is Test {
         string[] memory types = riskOracle.getAllUpdateTypes();
         bool found;
         for (uint256 i = 0; i < types.length; i++) {
-            if (
-                keccak256(abi.encodePacked(types[i])) ==
-                keccak256(abi.encodePacked("Type3"))
-            ) {
+            if (keccak256(abi.encodePacked(types[i])) == keccak256(abi.encodePacked("Type3"))) {
                 found = true;
                 break;
             }
@@ -74,25 +71,14 @@ contract RiskOracleTest is Test {
         bytes memory newValue = abi.encodePacked("newValue");
         vm.prank(address(0x4)); // Unauthorized address
         vm.expectRevert();
-        riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            newValue,
-            "Type1",
-            abi.encodePacked("market1")
-        );
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
     }
 
     function testAuthorizedCanPublishUpdates() public {
         bytes memory newValue = abi.encodePacked("newValue");
         vm.prank(authorizedSender); // Set msg.sender to authorized sender
-        riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            newValue,
-            "Type1",
-            abi.encodePacked("market1")
-        );
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByType("Type1");
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType("Type1");
         assertEq(update.referenceId, "ref1");
         assertEq(update.parameter, newValue);
     }
@@ -100,14 +86,8 @@ contract RiskOracleTest is Test {
     function testFetchUpdateDetails() public {
         bytes memory newValue = abi.encodePacked("newValue");
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            newValue,
-            "Type1",
-            abi.encodePacked("market1")
-        );
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .fetchUpdateDetails(1);
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.fetchUpdateDetails(1);
         assertEq(update.referenceId, "ref1");
         assertEq(update.parameter, newValue);
     }
@@ -117,23 +97,12 @@ contract RiskOracleTest is Test {
         bytes memory newValue2 = abi.encodePacked("newValue2");
 
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            newValue1,
-            "Type1",
-            abi.encodePacked("market1")
-        );
+        riskOracle.publishRiskParameterUpdate("ref1", newValue1, "Type1", abi.encodePacked("market1"));
 
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate(
-            "ref2",
-            newValue2,
-            "Type1",
-            abi.encodePacked("market2")
-        );
+        riskOracle.publishRiskParameterUpdate("ref2", newValue2, "Type1", abi.encodePacked("market2"));
 
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByType("Type1");
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType("Type1");
         assertEq(update.referenceId, "ref2");
         assertEq(update.parameter, newValue2);
     }
@@ -142,15 +111,9 @@ contract RiskOracleTest is Test {
         bytes memory newValue = abi.encodePacked("newValue");
         bytes memory market = abi.encodePacked("market1");
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            newValue,
-            "Type1",
-            market
-        );
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", market);
 
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByParameterAndMarket("Type1", market);
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByParameterAndMarket("Type1", market);
         assertEq(update.referenceId, "ref1");
         assertEq(update.parameter, newValue);
     }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.19;
 
 import "forge-std/Script.sol";
 import "../src/RiskOracle.sol";
@@ -24,10 +24,7 @@ contract DeployRiskOracle is Script {
         initialUpdateTypes[2] = "BorrowLimit";
 
         // Deploy the RiskOracle contract
-        RiskOracle riskOracle = new RiskOracle(
-            initialSenders,
-            initialUpdateTypes
-        );
+        RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);
 
         // Log the address of the deployed contract
         console.log("RiskOracle deployed at:", address(riskOracle));
