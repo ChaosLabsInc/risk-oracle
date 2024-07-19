@@ -24,7 +24,7 @@ RiskOracle is a smart contract that serves as a dynamic oracle for risk paramete
 To get started with RiskOracle, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/risk-oracle.git
+git clone https://github.com/ChaosLabsInc/risk-oracle.git
 cd risk-oracle
 ```
 
