@@ -88,37 +88,37 @@ contract RiskOracle is Ownable {
      * @notice Publishes a new risk parameter update.
      * @param referenceId An external reference ID associated with the update.
      * @param newValue The new value of the risk parameter being updated.
-     * @param typeOfUpdate Type of update performed, must be previously authorized.
+     * @param updateType Type of update performed, must be previously authorized.
      */
     function publishRiskParameterUpdate(
         string memory referenceId,
         bytes memory newValue,
-        string memory typeOfUpdate,
+        string memory updateType,
         bytes memory market
     ) external onlyAuthorized {
-        require(validUpdateTypes[typeOfUpdate], "Unauthorized update type.");
-        _processUpdate(referenceId, newValue, typeOfUpdate, market);
+        require(validUpdateTypes[updateType], "Unauthorized update type.");
+        _processUpdate(referenceId, newValue, updateType, market);
     }
 
     /**
      * @notice Publishes multiple risk parameter updates in a single transaction.
      * @param referenceIds Array of external reference IDs.
      * @param newValues Array of new values for each update.
-     * @param typesOfUpdates Array of types for each update, all must be authorized.
+     * @param updateTypes Array of types for each update, all must be authorized.
      */
     function publishBulkRiskParameterUpdates(
         string[] memory referenceIds,
         bytes[] memory newValues,
-        string[] memory typesOfUpdates,
+        string[] memory updateTypes,
         bytes[] memory markets
     ) external onlyAuthorized {
         require(
-            referenceIds.length == newValues.length && newValues.length == typesOfUpdates.length,
+            referenceIds.length == newValues.length && newValues.length == updateTypes.length,
             "Mismatch between argument array lengths."
         );
         for (uint256 i = 0; i < referenceIds.length; i++) {
-            require(validUpdateTypes[typesOfUpdates[i]], "Unauthorized update type at index");
-            _processUpdate(referenceIds[i], newValues[i], typesOfUpdates[i], markets[i]);
+            require(validUpdateTypes[updateTypes[i]], "Unauthorized update type at index");
+            _processUpdate(referenceIds[i], newValues[i], updateTypes[i], markets[i]);
         }
     }
 
@@ -128,19 +128,17 @@ contract RiskOracle is Ownable {
     function _processUpdate(
         string memory referenceId,
         bytes memory newValue,
-        string memory typeOfUpdate,
+        string memory updateType,
         bytes memory market
     ) internal {
         updateCounter++;
         bytes memory previousValue = updateCounter > 0 ? updatesById[updateCounter - 1].parameter : bytes("");
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
-            block.timestamp, newValue, referenceId, previousValue, typeOfUpdate, updateCounter, market
+            block.timestamp, newValue, referenceId, previousValue, updateType, updateCounter, market
         );
         updatesById[updateCounter] = newUpdate;
         updateHistory.push(newUpdate);
-        emit ParameterUpdated(
-            referenceId, newValue, previousValue, block.timestamp, typeOfUpdate, updateCounter, market
-        );
+        emit ParameterUpdated(referenceId, newValue, previousValue, block.timestamp, updateType, updateCounter, market);
     }
 
     /**

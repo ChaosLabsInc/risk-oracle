@@ -14,14 +14,11 @@ contract DeployRiskOracle is Script {
 
         // Set up initial authorized senders
         address[] memory initialSenders = new address[](2);
-        initialSenders[0] = 0x1234567890123456789012345678901234567890; // Replace with actual address
-        initialSenders[1] = 0x0987654321098765432109876543210987654321; // Replace with actual address
+        initialSenders[0] = 0xDBa8D5F693833f24CF4f9C716975BDAf6CEd0f15; // Replace with actual address
 
         // Set up initial update types
         string[] memory initialUpdateTypes = new string[](3);
-        initialUpdateTypes[0] = "LiquidationThreshold";
-        initialUpdateTypes[1] = "CollateralFactor";
-        initialUpdateTypes[2] = "BorrowLimit";
+        initialUpdateTypes[0] = "reserveFactor";
 
         // Deploy the RiskOracle contract
         RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);
