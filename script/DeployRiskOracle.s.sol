@@ -21,10 +21,7 @@ contract DeployRiskOracle is Script {
         initialUpdateTypes[0] = "ReserveFactor";
 
         // Deploy the RiskOracle contract
-        RiskOracle riskOracle = new RiskOracle(
-            initialSenders,
-            initialUpdateTypes
-        );
+        RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);
 
         // Log the address of the deployed contract
         console.log("RiskOracle deployed at:", address(riskOracle));
