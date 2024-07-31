@@ -44,6 +44,7 @@ The main contract is `RiskOracle.sol`, which implements the following key compon
 - `publishRiskParameterUpdate`: Function to publish a single update
 - `publishBulkRiskParameterUpdates`: Function to publish multiple updates in one transaction
 - `getLatestUpdateByType`: Function to retrieve the most recent update of a specific type
+- `getUpdateById`: Function to retrieve an update by ID
 - `getLatestUpdateByParameterAndMarket`: Function to fetch the latest update for a specific parameter and market
 - Access control functions for managing authorized senders and update types
 
