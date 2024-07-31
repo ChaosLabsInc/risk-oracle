@@ -83,11 +83,11 @@ contract RiskOracleTest is Test {
         assertEq(update.parameter, newValue);
     }
 
-    function testFetchUpdateDetails() public {
+    function testGetUpdateById() public {
         bytes memory newValue = abi.encodePacked("newValue");
         vm.prank(authorizedSender);
         riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
-        RiskOracle.RiskParameterUpdate memory update = riskOracle.fetchUpdateDetails(1);
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(1);
         assertEq(update.referenceId, "ref1");
         assertEq(update.parameter, newValue);
     }

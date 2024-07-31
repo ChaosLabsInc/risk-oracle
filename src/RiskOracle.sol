@@ -142,16 +142,6 @@ contract RiskOracle is Ownable {
     }
 
     /**
-     * @notice Fetches details about a specific update using its unique identifier.
-     * @param updateId ID of the update to retrieve.
-     * @return RiskParameterUpdate structure with all details of the update.
-     */
-    function fetchUpdateDetails(uint256 updateId) external view returns (RiskParameterUpdate memory) {
-        require(updateId > 0 && updateId <= updateCounter, "Invalid or non-existing update ID");
-        return updatesById[updateId];
-    }
-
-    /**
      * @notice Retrieves the most recent update for a given update type.
      * @param updateType The specific type of update to retrieve.
      * @return The most recent RiskParameterUpdate of the specified type.
