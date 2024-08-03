@@ -13,12 +13,13 @@ contract DeployRiskOracle is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Set up initial authorized senders
-        address[] memory initialSenders = new address[](2);
+        address[] memory initialSenders = new address[](1);
         initialSenders[0] = 0xDBa8D5F693833f24CF4f9C716975BDAf6CEd0f15; // Replace with actual address
 
         // Set up initial update types
-        string[] memory initialUpdateTypes = new string[](3);
-        initialUpdateTypes[0] = "ReserveFactor";
+        string[] memory initialUpdateTypes = new string[](2);
+        initialUpdateTypes[0] = "maxOpenInterestForLongs";
+        initialUpdateTypes[1] = "maxOpenInterestForShorts";
 
         // Deploy the RiskOracle contract
         RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);

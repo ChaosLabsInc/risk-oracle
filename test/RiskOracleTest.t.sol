@@ -80,7 +80,7 @@ contract RiskOracleTest is Test {
         riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType("Type1");
         assertEq(update.referenceId, "ref1");
-        assertEq(update.parameter, newValue);
+        assertEq(update.newValue, newValue);
     }
 
     function testGetUpdateById() public {
@@ -89,7 +89,7 @@ contract RiskOracleTest is Test {
         riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(1);
         assertEq(update.referenceId, "ref1");
-        assertEq(update.parameter, newValue);
+        assertEq(update.newValue, newValue);
     }
 
     function testGetLatestUpdateByType() public {
@@ -104,7 +104,7 @@ contract RiskOracleTest is Test {
 
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType("Type1");
         assertEq(update.referenceId, "ref2");
-        assertEq(update.parameter, newValue2);
+        assertEq(update.newValue, newValue2);
     }
 
     function testGetLatestUpdateByParameterAndMarket() public {
@@ -115,6 +115,6 @@ contract RiskOracleTest is Test {
 
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByParameterAndMarket("Type1", market);
         assertEq(update.referenceId, "ref1");
-        assertEq(update.parameter, newValue);
+        assertEq(update.newValue, newValue);
     }
 }

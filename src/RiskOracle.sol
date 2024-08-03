@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract RiskOracle is Ownable {
     struct RiskParameterUpdate {
         uint256 timestamp; // Timestamp of the update
-        bytes parameter; // Encoded parameters, flexible for various data types
+        bytes newValue; // Encoded parameters, flexible for various data types
         string referenceId; // External reference, potentially linking to a document or off-chain data
         bytes previousValue; // Previous value of the parameter for historical comparison
         string updateType; // Classification of the update for validation purposes
@@ -132,7 +132,7 @@ contract RiskOracle is Ownable {
         bytes memory market
     ) internal {
         updateCounter++;
-        bytes memory previousValue = updateCounter > 0 ? updatesById[updateCounter - 1].parameter : bytes("");
+        bytes memory previousValue = updateCounter > 0 ? updatesById[updateCounter - 1].newValue : bytes("");
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
             block.timestamp, newValue, referenceId, previousValue, updateType, updateCounter, market
         );
