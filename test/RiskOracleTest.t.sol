@@ -69,15 +69,17 @@ contract RiskOracleTest is Test {
 
     function testUnauthorizedCannotPublishUpdates() public {
         bytes memory newValue = abi.encodePacked("newValue");
+        bytes memory additionalData = abi.encodePacked("additionalData");
         vm.prank(address(0x4)); // Unauthorized address
         vm.expectRevert();
-        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"), additionalData);
     }
 
     function testAuthorizedCanPublishUpdates() public {
         bytes memory newValue = abi.encodePacked("newValue");
+        bytes memory additionalData = abi.encodePacked("additionalData");
         vm.prank(authorizedSender); // Set msg.sender to authorized sender
-        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"), additionalData);
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType("Type1");
         assertEq(update.referenceId, "ref1");
         assertEq(update.newValue, newValue);
@@ -85,8 +87,9 @@ contract RiskOracleTest is Test {
 
     function testGetUpdateById() public {
         bytes memory newValue = abi.encodePacked("newValue");
+        bytes memory additionalData = abi.encodePacked("additionalData");
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"));
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", abi.encodePacked("market1"), additionalData);
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(1);
         assertEq(update.referenceId, "ref1");
         assertEq(update.newValue, newValue);
@@ -95,12 +98,13 @@ contract RiskOracleTest is Test {
     function testGetLatestUpdateByType() public {
         bytes memory newValue1 = abi.encodePacked("newValue1");
         bytes memory newValue2 = abi.encodePacked("newValue2");
+        bytes memory additionalData = abi.encodePacked("additionalData");
 
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate("ref1", newValue1, "Type1", abi.encodePacked("market1"));
+        riskOracle.publishRiskParameterUpdate("ref1", newValue1, "Type1", abi.encodePacked("market1"), additionalData);
 
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate("ref2", newValue2, "Type1", abi.encodePacked("market2"));
+        riskOracle.publishRiskParameterUpdate("ref2", newValue2, "Type1", abi.encodePacked("market2"), additionalData);
 
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType("Type1");
         assertEq(update.referenceId, "ref2");
@@ -110,11 +114,50 @@ contract RiskOracleTest is Test {
     function testGetLatestUpdateByParameterAndMarket() public {
         bytes memory newValue = abi.encodePacked("newValue");
         bytes memory market = abi.encodePacked("market1");
+        bytes memory additionalData = abi.encodePacked("additionalData");
         vm.prank(authorizedSender);
-        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", market);
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", market, additionalData);
 
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByParameterAndMarket("Type1", market);
         assertEq(update.referenceId, "ref1");
         assertEq(update.newValue, newValue);
+    }
+
+    function testPublishRiskParameterUpdate() public {
+        bytes memory newValue = abi.encodePacked("newValue");
+        bytes memory market = abi.encodePacked("market");
+        bytes memory additionalData = abi.encodePacked("additionalData");
+        vm.prank(authorizedSender);
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "Type1", market, additionalData);
+
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(1);
+        assertEq(update.referenceId, "ref1");
+        assertEq(update.newValue, newValue);
+        assertEq(update.updateType, "Type1");
+        assertEq(update.market, market);
+        assertEq(update.additionalData, additionalData);
+    }
+
+    function testPublishBulkRiskParameterUpdates() public {
+        string[] memory referenceIds = new string[](1);
+        referenceIds[0] = "ref1";
+        bytes[] memory newValues = new bytes[](1);
+        newValues[0] = abi.encodePacked("newValue");
+        string[] memory updateTypes = new string[](1);
+        updateTypes[0] = "Type1";
+        bytes[] memory markets = new bytes[](1);
+        markets[0] = abi.encodePacked("market");
+        bytes[] memory additionalData = new bytes[](1);
+        additionalData[0] = abi.encodePacked("additionalData");
+
+        vm.prank(authorizedSender);
+        riskOracle.publishBulkRiskParameterUpdates(referenceIds, newValues, updateTypes, markets, additionalData);
+
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(1);
+        assertEq(update.referenceId, "ref1");
+        assertEq(update.newValue, newValues[0]);
+        assertEq(update.updateType, updateTypes[0]);
+        assertEq(update.market, markets[0]);
+        assertEq(update.additionalData, additionalData[0]);
     }
 }

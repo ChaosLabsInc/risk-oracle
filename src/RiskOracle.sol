@@ -16,6 +16,7 @@ contract RiskOracle is Ownable {
         string updateType; // Classification of the update for validation purposes
         uint256 updateId; // Unique identifier for this specific update
         bytes market; // Unique identifier for market of the parameter update
+        bytes additionalData; // Additional data for the update
     }
 
     RiskParameterUpdate[] private updateHistory; // Stores all historical updates
@@ -32,7 +33,8 @@ contract RiskOracle is Ownable {
         uint256 timestamp,
         string indexed updateType,
         uint256 indexed updateId,
-        bytes indexed market
+        bytes indexed market,
+        bytes additionalData
     );
 
     modifier onlyAuthorized() {
@@ -89,15 +91,18 @@ contract RiskOracle is Ownable {
      * @param referenceId An external reference ID associated with the update.
      * @param newValue The new value of the risk parameter being updated.
      * @param updateType Type of update performed, must be previously authorized.
+     * @param market Unique identifier for market of the parameter update
+     * @param additionalData Additional data for the update
      */
     function publishRiskParameterUpdate(
         string memory referenceId,
         bytes memory newValue,
         string memory updateType,
-        bytes memory market
+        bytes memory market,
+        bytes memory additionalData
     ) external onlyAuthorized {
         require(validUpdateTypes[updateType], "Unauthorized update type.");
-        _processUpdate(referenceId, newValue, updateType, market);
+        _processUpdate(referenceId, newValue, updateType, market, additionalData);
     }
 
     /**
@@ -105,20 +110,25 @@ contract RiskOracle is Ownable {
      * @param referenceIds Array of external reference IDs.
      * @param newValues Array of new values for each update.
      * @param updateTypes Array of types for each update, all must be authorized.
+     * @param markets Array of unique identifiers for markets of the parameter updates
+     * @param additionalData Array of additional data for the updates
+     *
      */
     function publishBulkRiskParameterUpdates(
         string[] memory referenceIds,
         bytes[] memory newValues,
         string[] memory updateTypes,
-        bytes[] memory markets
+        bytes[] memory markets,
+        bytes[] memory additionalData
     ) external onlyAuthorized {
         require(
-            referenceIds.length == newValues.length && newValues.length == updateTypes.length,
+            referenceIds.length == newValues.length && newValues.length == updateTypes.length
+                && updateTypes.length == markets.length && markets.length == additionalData.length,
             "Mismatch between argument array lengths."
         );
         for (uint256 i = 0; i < referenceIds.length; i++) {
             require(validUpdateTypes[updateTypes[i]], "Unauthorized update type at index");
-            _processUpdate(referenceIds[i], newValues[i], updateTypes[i], markets[i]);
+            _processUpdate(referenceIds[i], newValues[i], updateTypes[i], markets[i], additionalData[i]);
         }
     }
 
@@ -129,16 +139,19 @@ contract RiskOracle is Ownable {
         string memory referenceId,
         bytes memory newValue,
         string memory updateType,
-        bytes memory market
+        bytes memory market,
+        bytes memory additionalData
     ) internal {
         updateCounter++;
         bytes memory previousValue = updateCounter > 0 ? updatesById[updateCounter - 1].newValue : bytes("");
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
-            block.timestamp, newValue, referenceId, previousValue, updateType, updateCounter, market
+            block.timestamp, newValue, referenceId, previousValue, updateType, updateCounter, market, additionalData
         );
         updatesById[updateCounter] = newUpdate;
         updateHistory.push(newUpdate);
-        emit ParameterUpdated(referenceId, newValue, previousValue, block.timestamp, updateType, updateCounter, market);
+        emit ParameterUpdated(
+            referenceId, newValue, previousValue, block.timestamp, updateType, updateCounter, market, additionalData
+        );
     }
 
     /**
