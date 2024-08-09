@@ -21,10 +21,13 @@ contract RiskOracle is Ownable {
 
     RiskParameterUpdate[] private updateHistory; // Stores all historical updates
     string[] private allUpdateTypes; // Array to store all update types
+
     mapping(string => bool) private validUpdateTypes; // Whitelist of valid update type identifiers
     mapping(uint256 => RiskParameterUpdate) private updatesById; // Mapping from unique update ID to the update details
-    uint256 public updateCounter; // Counter to keep track of the total number of updates
     mapping(address => bool) private authorizedSenders; // Authorized accounts capable of executing updates
+    mapping(bytes32 => uint256) private latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
+
+    uint256 public updateCounter; // Counter to keep track of the total number of updates
 
     event ParameterUpdated(
         string referenceId,
@@ -149,6 +152,11 @@ contract RiskOracle is Ownable {
         );
         updatesById[updateCounter] = newUpdate;
         updateHistory.push(newUpdate);
+
+        // Update the latest update ID for the market and updateType combination
+        bytes32 key = keccak256(abi.encode(market, updateType));
+        latestUpdateIdByMarketAndType[key] = updateCounter;
+
         emit ParameterUpdated(
             referenceId, newValue, previousValue, block.timestamp, updateType, updateCounter, market, additionalData
         );
@@ -183,16 +191,10 @@ contract RiskOracle is Ownable {
         view
         returns (RiskParameterUpdate memory)
     {
-        for (int256 i = int256(updateHistory.length) - 1; i >= 0; i--) {
-            RiskParameterUpdate storage update = updateHistory[uint256(i)];
-            if (
-                keccak256(abi.encodePacked(update.updateType)) == keccak256(abi.encodePacked(updateType))
-                    && keccak256(update.market) == keccak256(market)
-            ) {
-                return update;
-            }
-        }
-        revert("No update found for the specified parameter and market.");
+        bytes32 key = keccak256(abi.encode(market, updateType));
+        uint256 updateId = latestUpdateIdByMarketAndType[key];
+        require(updateId > 0, "No update found for the specified parameter and market.");
+        return updatesById[updateId];
     }
 
     /*

@@ -160,4 +160,18 @@ contract RiskOracleTest is Test {
         assertEq(update.market, markets[0]);
         assertEq(update.additionalData, additionalData[0]);
     }
+
+    function testCannotRemoveNonExistentAuthorizedSender() public {
+        vm.prank(owner);
+        vm.expectRevert();
+        riskOracle.removeAuthorizedSender(address(0x5));
+    }
+
+    function testCannotPublishUpdateWithEmptyUpdateType() public {
+        bytes memory newValue = abi.encodePacked("newValue");
+        bytes memory additionalData = abi.encodePacked("additionalData");
+        vm.prank(authorizedSender);
+        vm.expectRevert();
+        riskOracle.publishRiskParameterUpdate("ref1", newValue, "", abi.encodePacked("market1"), additionalData);
+    }
 }
