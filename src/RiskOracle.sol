@@ -21,11 +21,10 @@ contract RiskOracle is Ownable {
 
     RiskParameterUpdate[] private updateHistory; // Stores all historical updates
     string[] private allUpdateTypes; // Array to store all update types
-
     mapping(string => bool) private validUpdateTypes; // Whitelist of valid update type identifiers
     mapping(uint256 => RiskParameterUpdate) private updatesById; // Mapping from unique update ID to the update details
+    mapping(bytes => mapping(string => uint256)) private latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
     mapping(address => bool) private authorizedSenders; // Authorized accounts capable of executing updates
-    mapping(bytes32 => uint256) private latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
 
     uint256 public updateCounter; // Counter to keep track of the total number of updates
 
@@ -39,6 +38,10 @@ contract RiskOracle is Ownable {
         bytes indexed market,
         bytes additionalData
     );
+
+    event AuthorizedSenderAdded(address indexed sender);
+    event AuthorizedSenderRemoved(address indexed sender);
+    event UpdateTypeAdded(string indexed updateType);
 
     modifier onlyAuthorized() {
         require(authorizedSenders[msg.sender], "Unauthorized: Sender not authorized.");
@@ -68,6 +71,7 @@ contract RiskOracle is Ownable {
     function addAuthorizedSender(address sender) external onlyOwner {
         require(!authorizedSenders[sender], "Sender already authorized.");
         authorizedSenders[sender] = true;
+        emit AuthorizedSenderAdded(sender);
     }
 
     /**
@@ -77,6 +81,7 @@ contract RiskOracle is Ownable {
     function removeAuthorizedSender(address sender) external onlyOwner {
         require(authorizedSenders[sender], "Sender not authorized.");
         authorizedSenders[sender] = false;
+        emit AuthorizedSenderRemoved(sender);
     }
 
     /**
@@ -87,6 +92,7 @@ contract RiskOracle is Ownable {
         require(!validUpdateTypes[newUpdateType], "Update type already exists.");
         validUpdateTypes[newUpdateType] = true;
         allUpdateTypes.push(newUpdateType);
+        emit UpdateTypeAdded(newUpdateType);
     }
 
     /**
@@ -154,8 +160,7 @@ contract RiskOracle is Ownable {
         updateHistory.push(newUpdate);
 
         // Update the latest update ID for the market and updateType combination
-        bytes32 key = keccak256(abi.encode(market, updateType));
-        latestUpdateIdByMarketAndType[key] = updateCounter;
+        latestUpdateIdByMarketAndType[market][updateType] = updateCounter;
 
         emit ParameterUpdated(
             referenceId, newValue, previousValue, block.timestamp, updateType, updateCounter, market, additionalData
@@ -191,8 +196,7 @@ contract RiskOracle is Ownable {
         view
         returns (RiskParameterUpdate memory)
     {
-        bytes32 key = keccak256(abi.encode(market, updateType));
-        uint256 updateId = latestUpdateIdByMarketAndType[key];
+        uint256 updateId = latestUpdateIdByMarketAndType[market][updateType];
         require(updateId > 0, "No update found for the specified parameter and market.");
         return updatesById[updateId];
     }
