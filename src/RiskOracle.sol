@@ -23,9 +23,9 @@ contract RiskOracle is Ownable {
     string[] private allUpdateTypes; // Array to store all update types
     mapping(string => bool) private validUpdateTypes; // Whitelist of valid update type identifiers
     mapping(uint256 => RiskParameterUpdate) private updatesById; // Mapping from unique update ID to the update details
-    mapping(bytes => mapping(string => uint256)) private latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
     mapping(address => bool) private authorizedSenders; // Authorized accounts capable of executing updates
 
+    mapping(bytes => mapping(string => uint256)) public latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
     uint256 public updateCounter; // Counter to keep track of the total number of updates
 
     event ParameterUpdated(
