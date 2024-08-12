@@ -8,3 +8,4 @@ libs = ["lib"]
 # Ensure the optimizer is enabled
 optimizer = true
 optimizer_runs = 200
+coverage = true
