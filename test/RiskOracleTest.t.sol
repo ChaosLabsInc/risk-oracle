@@ -174,4 +174,39 @@ contract RiskOracleTest is Test {
         vm.expectRevert();
         riskOracle.publishRiskParameterUpdate("ref1", newValue, "", abi.encodePacked("market1"), additionalData);
     }
+
+    function testPreviousValueIsCorrectForSpecificMarketAndType() public {
+        bytes memory market1 = abi.encodePacked("market1");
+        bytes memory market2 = abi.encodePacked("market2");
+        bytes memory newValue1 = abi.encodePacked("value1");
+        bytes memory newValue2 = abi.encodePacked("value2");
+        bytes memory newValue3 = abi.encodePacked("value3");
+        bytes memory newValue4 = abi.encodePacked("value4");
+
+        // Publish first update for market1 and type1
+        vm.prank(authorizedSender);
+        riskOracle.publishRiskParameterUpdate("ref1", newValue1, "Type1", market1, abi.encodePacked("additionalData1"));
+
+        // Publish second update for market1 and type1
+        vm.prank(authorizedSender);
+        riskOracle.publishRiskParameterUpdate("ref2", newValue2, "Type1", market1, abi.encodePacked("additionalData2"));
+
+        // Publish first update for market2 and type1
+        vm.prank(authorizedSender);
+        riskOracle.publishRiskParameterUpdate("ref3", newValue3, "Type1", market2, abi.encodePacked("additionalData3"));
+
+        // Publish first update for market1 and type1
+        vm.prank(authorizedSender);
+        riskOracle.publishRiskParameterUpdate("ref4", newValue4, "Type1", market1, abi.encodePacked("additionalData4"));
+
+        // Fetch the latest update for market1 and type1
+        RiskOracle.RiskParameterUpdate memory latestUpdateMarket1Type1 =
+            riskOracle.getLatestUpdateByParameterAndMarket("Type1", market1);
+        assertEq(latestUpdateMarket1Type1.previousValue, newValue2);
+
+        // Fetch the latest update for market2 and type1
+        RiskOracle.RiskParameterUpdate memory latestUpdateMarket2Type1 =
+            riskOracle.getLatestUpdateByParameterAndMarket("Type1", market2);
+        assertEq(latestUpdateMarket2Type1.previousValue, bytes(""));
+    }
 }
