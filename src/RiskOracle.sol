@@ -152,7 +152,9 @@ contract RiskOracle is Ownable {
         bytes memory additionalData
     ) internal {
         updateCounter++;
-        bytes memory previousValue = updateCounter > 0 ? updatesById[updateCounter - 1].newValue : bytes("");
+        uint256 previousUpdateId = latestUpdateIdByMarketAndType[market][updateType];
+        bytes memory previousValue = previousUpdateId > 0 ? updatesById[previousUpdateId].newValue : bytes("");
+
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
             block.timestamp, newValue, referenceId, previousValue, updateType, updateCounter, market, additionalData
         );
