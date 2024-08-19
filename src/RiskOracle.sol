@@ -19,7 +19,7 @@ contract RiskOracle is Ownable {
         bytes additionalData; // Additional data for the update
     }
 
-    RiskParameterUpdate[] private updateHistory; // Stores all historical updates
+    RiskParameterUpdate[] internal updateHistory; // Stores all historical updates
     string[] private allUpdateTypes; // Array to store all update types
     mapping(string => bool) internal validUpdateTypes; // Whitelist of valid update type identifiers
     mapping(uint256 => RiskParameterUpdate) private updatesById; // Mapping from unique update ID to the update details

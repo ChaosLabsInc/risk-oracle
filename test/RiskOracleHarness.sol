@@ -20,4 +20,8 @@ contract RiskOracleHarness is RiskOracle {
     function exposed_validUpdateTypes(string memory updateType) public view returns (bool) {
         return validUpdateTypes[updateType];
     }
+
+    function exposed_updateHistory() public view returns (RiskParameterUpdate[] memory) {
+        return updateHistory;
+    }
 }
