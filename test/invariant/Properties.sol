@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
-import {Asserts} from "@chimera/Asserts.sol";
 import {BeforeAfter} from "./BeforeAfter.sol";
 import {PropertiesSpecifications} from "./PropertiesSpecifications.sol";
 
 import {RiskOracle} from "src/RiskOracle.sol";
 
 // property tests get run after each call in a given sequence
-abstract contract Properties is Asserts, BeforeAfter, PropertiesSpecifications {
+abstract contract Properties is BeforeAfter, PropertiesSpecifications {
     function invariant_no_duplicated_update_types() public returns (bool) {
         string[] memory allUpdateTypes = riskOracle.getAllUpdateTypes();
         for (uint256 i = 0; i < allUpdateTypes.length; i++) {
@@ -54,12 +53,9 @@ abstract contract Properties is Asserts, BeforeAfter, PropertiesSpecifications {
 
     function invariant_update_counter_is_monotonically_increasing() public returns (bool) {
         // riskOracle_updateCounter should be equal to _before.riskOracle_updateCounter, if a function was called in the
-        // sequence that doesn't affect this state. Otherwise, the _after value should be at least equal to _before + 1 
+        // sequence that doesn't affect this state. Otherwise, the _after value should be at least equal to _before + 1
         // due to the updateCounter being incremented multiple times in the batch update call.
-        t(
-            _after.riskOracle_updateCounter >= _before.riskOracle_updateCounter,
-            UPDATE_COUNTER_03
-        );
+        t(_after.riskOracle_updateCounter >= _before.riskOracle_updateCounter, UPDATE_COUNTER_03);
 
         return true;
     }
