@@ -24,4 +24,5 @@ contract RiskOracleHarness is RiskOracle {
     function exposed_updateHistory() public view returns (RiskParameterUpdate[] memory) {
         return updateHistory;
     }
+
 }
