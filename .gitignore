@@ -26,3 +26,8 @@ script/*
 # Unignore the specific file
 !script/script/DeployRiskOracle.s.sol
 !script/script/RiskOracle.s.sol
+
+# crytic
+crytic-export/
+medusa/
+echidna/

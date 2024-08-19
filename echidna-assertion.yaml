@@ -1,0 +1,10 @@
+testMode: "assertion"
+prefix: "invariant_"
+coverage: true
+corpusDir: "echidna/corpus-assertion"
+cryticArgs:
+  [
+    "--foundry-compile-all"
+  ]
+deployContracts:
+  []
