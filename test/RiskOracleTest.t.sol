@@ -263,8 +263,7 @@ contract RiskOracleTest is Test {
         string memory updateType = initialUpdateTypes[0];
         bytes memory newValue1 = abi.encodePacked("newValue1");
         bytes memory newValue2 = abi.encodePacked("newValue2");
-        bytes memory market1 = abi.encodePacked("market1");
-        bytes memory market2 = abi.encodePacked("market2");
+        bytes memory market = abi.encodePacked("market");
         bytes memory additionalData = abi.encodePacked("additionalData");
 
         vm.startPrank(AUTHORIZED_SENDER);
@@ -276,10 +275,10 @@ contract RiskOracleTest is Test {
             block.timestamp,
             updateType,
             riskOracle.updateCounter() + 1,
-            market1,
+            market,
             additionalData
         );
-        riskOracle.publishRiskParameterUpdate(referenceId1, newValue1, updateType, market1, additionalData);
+        riskOracle.publishRiskParameterUpdate(referenceId1, newValue1, updateType, market, additionalData);
         vm.expectEmit(true, true, true, true);
         emit RiskOracle.ParameterUpdated(
             referenceId2,
@@ -288,10 +287,10 @@ contract RiskOracleTest is Test {
             block.timestamp,
             updateType,
             riskOracle.updateCounter() + 1,
-            market2,
+            market,
             additionalData
         );
-        riskOracle.publishRiskParameterUpdate(referenceId2, newValue2, updateType, market2, additionalData);
+        riskOracle.publishRiskParameterUpdate(referenceId2, newValue2, updateType, market, additionalData);
         vm.stopPrank();
 
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType(updateType);
@@ -300,7 +299,7 @@ contract RiskOracleTest is Test {
         assertEq(update.previousValue, newValue1);
         assertEq(update.updateType, updateType);
         assertEq(update.updateId, riskOracle.updateCounter());
-        assertEq(update.market, market2);
+        assertEq(update.market, market);
         assertEq(update.additionalData, additionalData);
     }
 
@@ -315,7 +314,6 @@ contract RiskOracleTest is Test {
         bytes memory newValue3 = abi.encodePacked("newValue3");
         bytes memory market1 = abi.encodePacked("market1");
         bytes memory market2 = abi.encodePacked("market2");
-        bytes memory market3 = abi.encodePacked("market3");
         bytes memory additionalData = abi.encodePacked("additionalData");
 
         vm.startPrank(AUTHORIZED_SENDER);
@@ -351,10 +349,10 @@ contract RiskOracleTest is Test {
             block.timestamp,
             updateType1,
             riskOracle.updateCounter() + 1,
-            market3,
+            market1,
             additionalData
         );
-        riskOracle.publishRiskParameterUpdate(referenceId3, newValue3, updateType1, market3, additionalData);
+        riskOracle.publishRiskParameterUpdate(referenceId3, newValue3, updateType1, market1, additionalData);
         vm.stopPrank();
 
         RiskOracle.RiskParameterUpdate memory update = riskOracle.getLatestUpdateByType(updateType1);
@@ -363,7 +361,7 @@ contract RiskOracleTest is Test {
         assertEq(update.previousValue, newValue1);
         assertEq(update.updateType, updateType1);
         assertEq(update.updateId, riskOracle.updateCounter());
-        assertEq(update.market, market3);
+        assertEq(update.market, market1);
         assertEq(update.additionalData, additionalData);
     }
 
@@ -457,7 +455,7 @@ contract RiskOracleTest is Test {
         assertEq(update.additionalData, additionalData[0]);
     }
 
-    function test_PublishBulkRiskParameterUpdatesMultipleSameUpdateType() public {
+    function test_PublishBulkRiskParameterUpdatesMultipleSameUpdateTypeAndMarket() public {
         string[] memory referenceIds = new string[](2);
         referenceIds[0] = "ref1";
         referenceIds[1] = "ref2";
@@ -469,7 +467,7 @@ contract RiskOracleTest is Test {
         updateTypes[1] = initialUpdateTypes[0];
         bytes[] memory markets = new bytes[](2);
         markets[0] = abi.encodePacked("market1");
-        markets[1] = abi.encodePacked("market2");
+        markets[1] = abi.encodePacked("market1");
         bytes[] memory additionalData = new bytes[](2);
         additionalData[0] = abi.encodePacked("additionalData");
         additionalData[1] = abi.encodePacked("additionalData");
