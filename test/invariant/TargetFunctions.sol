@@ -68,7 +68,6 @@ abstract contract TargetFunctions is ExpectedErrors {
         __before();
 
         updateType = _getRandomUpdateType(updateType);
-
         vm.prank(msgSender);
         (success, returnData) = address(riskOracle).call(
             abi.encodeCall(
@@ -90,11 +89,9 @@ abstract contract TargetFunctions is ExpectedErrors {
         bytes[] memory additionalData
     ) public getMsgSender checkExpectedErrors(RISK_ORACLE_AUTHORIZED_UPDATE_ERRORS) {
         __before();
-
         for (uint256 i = 0; i < updateTypes.length; i++) {
             updateTypes[i] = _getRandomUpdateType(updateTypes[i]);
         }
-
         vm.prank(msgSender);
         (success, returnData) = address(riskOracle).call(
             abi.encodeCall(
@@ -114,7 +111,6 @@ abstract contract TargetFunctions is ExpectedErrors {
         checkExpectedErrors(RISK_ORACLE_GETTER_ERRORS)
     {
         updateType = _getRandomUpdateType(updateType);
-
         (success, returnData) = address(riskOracle).call(abi.encodeCall(riskOracle.getLatestUpdateByType, updateType));
     }
 
@@ -127,7 +123,6 @@ abstract contract TargetFunctions is ExpectedErrors {
         checkExpectedErrors(RISK_ORACLE_GETTER_ERRORS)
     {
         updateType = _getRandomUpdateType(updateType);
-
         (success, returnData) = address(riskOracle).call(
             abi.encodeCall(riskOracle.getLatestUpdateByParameterAndMarket, (updateType, market))
         );

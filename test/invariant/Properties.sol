@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 
 import {BeforeAfter} from "./BeforeAfter.sol";
 import {PropertiesSpecifications} from "./PropertiesSpecifications.sol";
-
 import {RiskOracle} from "src/RiskOracle.sol";
 
 // property tests get run after each call in a given sequence
 abstract contract Properties is BeforeAfter, PropertiesSpecifications {
+
     function invariant_no_duplicated_update_types() public returns (bool) {
         string[] memory allUpdateTypes = riskOracle.getAllUpdateTypes();
         for (uint256 i = 0; i < allUpdateTypes.length; i++) {
@@ -56,7 +56,6 @@ abstract contract Properties is BeforeAfter, PropertiesSpecifications {
         // sequence that doesn't affect this state. Otherwise, the _after value should be at least equal to _before + 1
         // due to the updateCounter being incremented multiple times in the batch update call.
         t(_after.riskOracle_updateCounter >= _before.riskOracle_updateCounter, UPDATE_COUNTER_03);
-
         return true;
     }
 }
