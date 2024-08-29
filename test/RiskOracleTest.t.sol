@@ -10,8 +10,7 @@ contract RiskOracleTest is Test {
     address public OWNER = makeAddr("Owner");
     address public NOT_OWNER = makeAddr("Not Owner");
     address public AUTHORIZED_SENDER = makeAddr("Authorized Sender");
-    address public ANOTHER_AUTHORIZED_SENDER =
-        makeAddr("Another Authorized Sender");
+    address public ANOTHER_AUTHORIZED_SENDER = makeAddr("Another Authorized Sender");
     address public NOT_AUTHORIZED_SENDER = makeAddr("Not Authorized Sender");
 
     string[] public initialUpdateTypes = ["Type1", "Type2"];
@@ -42,40 +41,19 @@ contract RiskOracleTest is Test {
     function test_NonOwnerCannotAddAuthorizedSender() public {
         // Non-owner should not be able to add a new authorized sender
         vm.startPrank(NOT_OWNER);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                NOT_OWNER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, NOT_OWNER));
         riskOracle.addAuthorizedSender(ANOTHER_AUTHORIZED_SENDER);
         vm.stopPrank();
         assertFalse(riskOracle.isAuthorized(ANOTHER_AUTHORIZED_SENDER));
     }
 
-    function testFuzz_NonOwnerCannotAddAuthorizedSender(
-        address caller,
-        address sender
-    ) public {
+    function testFuzz_NonOwnerCannotAddAuthorizedSender(address caller, address sender) public {
         // Fuzz test: non-owner cannot add an authorized sender
-        vm.assume(
-            caller != OWNER &&
-                caller != AUTHORIZED_SENDER &&
-                caller != ANOTHER_AUTHORIZED_SENDER
-        );
-        vm.assume(
-            sender != OWNER &&
-                sender != AUTHORIZED_SENDER &&
-                sender != ANOTHER_AUTHORIZED_SENDER
-        );
+        vm.assume(caller != OWNER && caller != AUTHORIZED_SENDER && caller != ANOTHER_AUTHORIZED_SENDER);
+        vm.assume(sender != OWNER && sender != AUTHORIZED_SENDER && sender != ANOTHER_AUTHORIZED_SENDER);
 
         vm.startPrank(caller);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                caller
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
         riskOracle.addAuthorizedSender(sender);
         vm.stopPrank();
 
@@ -92,12 +70,7 @@ contract RiskOracleTest is Test {
     function test_NonOwnerCannotRemoveAuthorizedSender() public {
         // Non-owner should not be able to remove an authorized sender
         vm.startPrank(NOT_OWNER);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                NOT_OWNER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, NOT_OWNER));
         riskOracle.removeAuthorizedSender(AUTHORIZED_SENDER);
         vm.stopPrank();
     }
@@ -133,10 +106,8 @@ contract RiskOracleTest is Test {
         // Fuzz test: Owner adding a random update type
         vm.assume(bytes(updateType).length <= 64);
         vm.assume(
-            keccak256(abi.encodePacked(updateType)) !=
-                keccak256(abi.encodePacked(initialUpdateTypes[0])) &&
-                keccak256(abi.encodePacked(updateType)) !=
-                keccak256(abi.encodePacked(initialUpdateTypes[1]))
+            keccak256(abi.encodePacked(updateType)) != keccak256(abi.encodePacked(initialUpdateTypes[0]))
+                && keccak256(abi.encodePacked(updateType)) != keccak256(abi.encodePacked(initialUpdateTypes[1]))
         );
 
         vm.prank(OWNER);
@@ -149,31 +120,18 @@ contract RiskOracleTest is Test {
     function test_NonOwnerCannotAddUpdateType() public {
         // Non-owner should not be able to add a new update type
         vm.startPrank(NOT_OWNER);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                NOT_OWNER
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, NOT_OWNER));
         riskOracle.addUpdateType(anotherUpdateType);
         vm.stopPrank();
 
         assertFalse(riskOracle.exposed_validUpdateTypes(anotherUpdateType));
     }
 
-    function testFuzz_NonOwnerCannotAddUpdateType(
-        address caller,
-        string memory updateType
-    ) public {
+    function testFuzz_NonOwnerCannotAddUpdateType(address caller, string memory updateType) public {
         // Fuzz test: non-owner cannot add a new update type
         vm.assume(caller != OWNER);
         vm.startPrank(caller);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                caller
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
         riskOracle.addUpdateType(updateType);
         vm.stopPrank();
         assertFalse(riskOracle.exposed_validUpdateTypes(updateType));
@@ -220,10 +178,7 @@ contract RiskOracleTest is Test {
     }*/
     function test_AuthorizedCanPublishRiskParameterUpdates() public {
         // Ensure AUTHORIZED_SENDER is actually authorized
-        assertTrue(
-            riskOracle.isAuthorized(AUTHORIZED_SENDER),
-            "AUTHORIZED_SENDER should be authorized."
-        );
+        assertTrue(riskOracle.isAuthorized(AUTHORIZED_SENDER), "AUTHORIZED_SENDER should be authorized.");
 
         // Define variables for the test.
         string memory referenceId = "ref1";
@@ -253,44 +208,18 @@ contract RiskOracleTest is Test {
             additionalData
         );
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishRiskParameterUpdate(
-            referenceId,
-            newValue,
-            updateType,
-            market,
-            additionalData
-        );
+        riskOracle.publishRiskParameterUpdate(referenceId, newValue, updateType, market, additionalData);
 
         // Validate the state result.
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByParameterAndMarket(updateType, market);
+        RiskOracle.RiskParameterUpdate memory update =
+            riskOracle.getLatestUpdateByParameterAndMarket(updateType, market);
         assertEq(update.newValue, newValue, "newValue mismatch.");
         assertEq(update.referenceId, referenceId, "Reference ID mismatch.");
-        assertEq(
-            update.previousValue,
-            "",
-            "Mismatched previous value on the first record."
-        );
-        assertEq(
-            update.updateType,
-            updateType,
-            "Mismatch in identified update type."
-        );
-        assertEq(
-            update.updateId,
-            riskOracle.updateCounter(),
-            "updateCounter equals updateId on the last change."
-        );
-        assertEq(
-            update.market,
-            market,
-            "Mismatch detected in provided market."
-        );
-        assertEq(
-            update.additionalData,
-            additionalData,
-            "Final additionalData mismatch."
-        );
+        assertEq(update.previousValue, "", "Mismatched previous value on the first record.");
+        assertEq(update.updateType, updateType, "Mismatch in identified update type.");
+        assertEq(update.updateId, riskOracle.updateCounter(), "updateCounter equals updateId on the last change.");
+        assertEq(update.market, market, "Mismatch detected in provided market.");
+        assertEq(update.additionalData, additionalData, "Final additionalData mismatch.");
     }
 
     function test_SimplifiedAuthorizedSenderCanPublish() public {
@@ -311,9 +240,7 @@ contract RiskOracleTest is Test {
         address market,
         bytes memory additionalData
     ) public {
-        string memory updateType = initialUpdateTypes[
-            bound(updateTypeIndex, 0, initialUpdateTypes.length - 1)
-        ];
+        string memory updateType = initialUpdateTypes[bound(updateTypeIndex, 0, initialUpdateTypes.length - 1)];
 
         vm.prank(AUTHORIZED_SENDER);
         vm.expectEmit(true, true, true, true);
@@ -328,16 +255,10 @@ contract RiskOracleTest is Test {
             additionalData
         );
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishRiskParameterUpdate(
-            referenceId,
-            newValue,
-            updateType,
-            market,
-            additionalData
-        );
+        riskOracle.publishRiskParameterUpdate(referenceId, newValue, updateType, market, additionalData);
 
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByParameterAndMarket(updateType, market);
+        RiskOracle.RiskParameterUpdate memory update =
+            riskOracle.getLatestUpdateByParameterAndMarket(updateType, market);
         assertEq(update.newValue, newValue);
         assertEq(update.referenceId, referenceId);
         assertEq(update.previousValue, "");
@@ -351,11 +272,7 @@ contract RiskOracleTest is Test {
         vm.startPrank(NOT_AUTHORIZED_SENDER);
         vm.expectRevert("Unauthorized: Sender not authorized.");
         riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            abi.encodePacked("newValue"),
-            "Type1",
-            makeAddr("market1"),
-            abi.encodePacked("additionalData")
+            "ref1", abi.encodePacked("newValue"), "Type1", makeAddr("market1"), abi.encodePacked("additionalData")
         );
         assertEq(riskOracle.updateCounter(), 0);
     }
@@ -367,24 +284,14 @@ contract RiskOracleTest is Test {
         address market,
         bytes memory additionalData
     ) public {
-        string memory updateType = initialUpdateTypes[
-            bound(updateTypeIndex, 0, initialUpdateTypes.length - 1)
-        ];
+        string memory updateType = initialUpdateTypes[bound(updateTypeIndex, 0, initialUpdateTypes.length - 1)];
 
         vm.startPrank(NOT_AUTHORIZED_SENDER);
         vm.expectRevert("Unauthorized: Sender not authorized.");
-        riskOracle.publishRiskParameterUpdate(
-            referenceId,
-            newValue,
-            updateType,
-            market,
-            additionalData
-        );
+        riskOracle.publishRiskParameterUpdate(referenceId, newValue, updateType, market, additionalData);
         vm.stopPrank();
 
-        vm.expectRevert(
-            "No update found for the specified parameter and market."
-        );
+        vm.expectRevert("No update found for the specified parameter and market.");
         riskOracle.getLatestUpdateByParameterAndMarket(updateType, market);
         assertEq(riskOracle.updateCounter(), 0);
     }
@@ -393,11 +300,7 @@ contract RiskOracleTest is Test {
         vm.startPrank(AUTHORIZED_SENDER);
         vm.expectRevert("Unauthorized update type.");
         riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            abi.encodePacked("newValue"),
-            "",
-            makeAddr("market1"),
-            abi.encodePacked("additionalData")
+            "ref1", abi.encodePacked("newValue"), "", makeAddr("market1"), abi.encodePacked("additionalData")
         );
         vm.stopPrank();
     }
@@ -410,16 +313,8 @@ contract RiskOracleTest is Test {
         bytes memory additionalData = abi.encodePacked("additionalData");
 
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishRiskParameterUpdate(
-            referenceId,
-            newValue,
-            updateType,
-            market,
-            additionalData
-        );
-        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(
-            riskOracle.updateCounter()
-        );
+        riskOracle.publishRiskParameterUpdate(referenceId, newValue, updateType, market, additionalData);
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(riskOracle.updateCounter());
 
         assertEq(update.newValue, newValue);
         assertEq(update.referenceId, referenceId);
@@ -446,16 +341,10 @@ contract RiskOracleTest is Test {
         bytes memory additionalData = abi.encodePacked("additionalData");
 
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishRiskParameterUpdate(
-            referenceId,
-            newValue,
-            updateType,
-            market,
-            additionalData
-        );
+        riskOracle.publishRiskParameterUpdate(referenceId, newValue, updateType, market, additionalData);
 
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByParameterAndMarket(updateType, market);
+        RiskOracle.RiskParameterUpdate memory update =
+            riskOracle.getLatestUpdateByParameterAndMarket(updateType, market);
         assertEq(update.newValue, newValue);
         assertEq(update.referenceId, referenceId);
         assertEq(update.previousValue, "");
@@ -471,31 +360,17 @@ contract RiskOracleTest is Test {
         address market = makeAddr("market1");
         address invalidMarket = makeAddr("InvalidMarket");
 
-        vm.expectRevert(
-            "No update found for the specified parameter and market."
-        );
+        vm.expectRevert("No update found for the specified parameter and market.");
         riskOracle.getLatestUpdateByParameterAndMarket(updateType, market);
 
-        vm.expectRevert(
-            "No update found for the specified parameter and market."
-        );
+        vm.expectRevert("No update found for the specified parameter and market.");
         riskOracle.getLatestUpdateByParameterAndMarket(invalidType, market);
 
-        vm.expectRevert(
-            "No update found for the specified parameter and market."
-        );
-        riskOracle.getLatestUpdateByParameterAndMarket(
-            updateType,
-            invalidMarket
-        );
+        vm.expectRevert("No update found for the specified parameter and market.");
+        riskOracle.getLatestUpdateByParameterAndMarket(updateType, invalidMarket);
 
-        vm.expectRevert(
-            "No update found for the specified parameter and market."
-        );
-        riskOracle.getLatestUpdateByParameterAndMarket(
-            invalidType,
-            invalidMarket
-        );
+        vm.expectRevert("No update found for the specified parameter and market.");
+        riskOracle.getLatestUpdateByParameterAndMarket(invalidType, invalidMarket);
     }
 
     function test_PublishBulkRiskParameterUpdatesSingular() public {
@@ -511,17 +386,9 @@ contract RiskOracleTest is Test {
         additionalData[0] = abi.encodePacked("additionalData");
 
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishBulkRiskParameterUpdates(
-            referenceIds,
-            newValues,
-            updateTypes,
-            markets,
-            additionalData
-        );
+        riskOracle.publishBulkRiskParameterUpdates(referenceIds, newValues, updateTypes, markets, additionalData);
 
-        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(
-            riskOracle.updateCounter()
-        );
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(riskOracle.updateCounter());
         assertEq(update.newValue, newValues[0]);
         assertEq(update.referenceId, referenceIds[0]);
         assertEq(update.previousValue, "");
@@ -531,9 +398,7 @@ contract RiskOracleTest is Test {
         assertEq(update.additionalData, additionalData[0]);
     }
 
-    function test_PublishBulkRiskParameterUpdatesMultipleSameUpdateType()
-        public
-    {
+    function test_PublishBulkRiskParameterUpdatesMultipleSameUpdateType() public {
         string[] memory referenceIds = new string[](2);
         referenceIds[0] = "ref1";
         referenceIds[1] = "ref2";
@@ -551,18 +416,10 @@ contract RiskOracleTest is Test {
         additionalData[1] = abi.encodePacked("additionalData");
 
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishBulkRiskParameterUpdates(
-            referenceIds,
-            newValues,
-            updateTypes,
-            markets,
-            additionalData
-        );
+        riskOracle.publishBulkRiskParameterUpdates(referenceIds, newValues, updateTypes, markets, additionalData);
 
         // Check the first update (should be as expected)
-        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(
-            riskOracle.updateCounter() - 1
-        );
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(riskOracle.updateCounter() - 1);
         assertEq(update.newValue, newValues[0]);
         assertEq(update.referenceId, referenceIds[0]);
         assertEq(update.previousValue, "");
@@ -600,17 +457,10 @@ contract RiskOracleTest is Test {
         additionalData[1] = abi.encodePacked("additionalData2");
 
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishBulkRiskParameterUpdates(
-            referenceIds,
-            newValues,
-            updateTypes,
-            markets,
-            additionalData
-        );
+        riskOracle.publishBulkRiskParameterUpdates(referenceIds, newValues, updateTypes, markets, additionalData);
 
         // Check the first update
-        RiskOracle.RiskParameterUpdate memory firstUpdate = riskOracle
-            .getUpdateById(riskOracle.updateCounter() - 1);
+        RiskOracle.RiskParameterUpdate memory firstUpdate = riskOracle.getUpdateById(riskOracle.updateCounter() - 1);
 
         assertEq(firstUpdate.newValue, newValues[0]);
         assertEq(firstUpdate.referenceId, referenceIds[0]);
@@ -621,8 +471,7 @@ contract RiskOracleTest is Test {
         assertEq(firstUpdate.additionalData, additionalData[0]);
 
         // Check the second update
-        RiskOracle.RiskParameterUpdate memory secondUpdate = riskOracle
-            .getUpdateById(riskOracle.updateCounter());
+        RiskOracle.RiskParameterUpdate memory secondUpdate = riskOracle.getUpdateById(riskOracle.updateCounter());
 
         assertEq(secondUpdate.newValue, newValues[1]);
         assertEq(secondUpdate.referenceId, referenceIds[1]);
@@ -633,9 +482,7 @@ contract RiskOracleTest is Test {
         assertEq(secondUpdate.additionalData, additionalData[1]);
     }
 
-    function test_PublishBulkRiskParameterUpdatesMultipleDifferentUpdateType()
-        public
-    {
+    function test_PublishBulkRiskParameterUpdatesMultipleDifferentUpdateType() public {
         string[] memory referenceIds = new string[](2);
         referenceIds[0] = "ref1";
         referenceIds[1] = "ref2";
@@ -653,17 +500,9 @@ contract RiskOracleTest is Test {
         additionalData[1] = abi.encodePacked("additionalData");
 
         vm.prank(AUTHORIZED_SENDER);
-        riskOracle.publishBulkRiskParameterUpdates(
-            referenceIds,
-            newValues,
-            updateTypes,
-            markets,
-            additionalData
-        );
+        riskOracle.publishBulkRiskParameterUpdates(referenceIds, newValues, updateTypes, markets, additionalData);
 
-        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(
-            riskOracle.updateCounter() - 1
-        );
+        RiskOracle.RiskParameterUpdate memory update = riskOracle.getUpdateById(riskOracle.updateCounter() - 1);
         assertEq(update.newValue, newValues[0]);
         assertEq(update.referenceId, referenceIds[0]);
         assertEq(update.previousValue, "");
@@ -693,50 +532,32 @@ contract RiskOracleTest is Test {
 
         vm.prank(AUTHORIZED_SENDER);
         riskOracle.publishRiskParameterUpdate(
-            "ref1",
-            newValue1,
-            updateType,
-            market1,
-            abi.encodePacked("additionalData1")
+            "ref1", newValue1, updateType, market1, abi.encodePacked("additionalData1")
         );
 
         vm.prank(AUTHORIZED_SENDER);
         riskOracle.publishRiskParameterUpdate(
-            "ref2",
-            newValue2,
-            updateType,
-            market1,
-            abi.encodePacked("additionalData2")
+            "ref2", newValue2, updateType, market1, abi.encodePacked("additionalData2")
         );
 
         vm.prank(AUTHORIZED_SENDER);
         riskOracle.publishRiskParameterUpdate(
-            "ref3",
-            newValue3,
-            updateType,
-            market2,
-            abi.encodePacked("additionalData3")
+            "ref3", newValue3, updateType, market2, abi.encodePacked("additionalData3")
         );
 
         vm.prank(AUTHORIZED_SENDER);
         riskOracle.publishRiskParameterUpdate(
-            "ref4",
-            newValue4,
-            updateType,
-            market1,
-            abi.encodePacked("additionalData4")
+            "ref4", newValue4, updateType, market1, abi.encodePacked("additionalData4")
         );
 
         // Assertions follow
 
-        RiskOracle.RiskParameterUpdate
-            memory latestUpdateMarket1Type1 = riskOracle
-                .getLatestUpdateByParameterAndMarket(updateType, market1);
+        RiskOracle.RiskParameterUpdate memory latestUpdateMarket1Type1 =
+            riskOracle.getLatestUpdateByParameterAndMarket(updateType, market1);
         assertEq(latestUpdateMarket1Type1.previousValue, newValue2);
 
-        RiskOracle.RiskParameterUpdate
-            memory latestUpdateMarket2Type1 = riskOracle
-                .getLatestUpdateByParameterAndMarket(updateType, market2);
+        RiskOracle.RiskParameterUpdate memory latestUpdateMarket2Type1 =
+            riskOracle.getLatestUpdateByParameterAndMarket(updateType, market2);
         assertEq(latestUpdateMarket2Type1.previousValue, bytes(""));
     }
 }
