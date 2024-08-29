@@ -48,7 +48,7 @@ abstract contract TargetFunctions is ExpectedErrors {
         string memory referenceId,
         bytes memory newValue,
         string memory updateType,
-        bytes memory market,
+        address market,
         bytes memory additionalData
     ) public getMsgSender checkExpectedErrors(RISK_ORACLE_AUTHORIZED_UPDATE_ERRORS) {
         __before();
@@ -70,7 +70,7 @@ abstract contract TargetFunctions is ExpectedErrors {
         string[] memory referenceIds,
         bytes[] memory newValues,
         string[] memory updateTypes,
-        bytes[] memory markets,
+        address[] memory markets,
         bytes[] memory additionalData
     ) public getMsgSender checkExpectedErrors(RISK_ORACLE_AUTHORIZED_UPDATE_ERRORS) {
         __before();
@@ -89,18 +89,11 @@ abstract contract TargetFunctions is ExpectedErrors {
         }
     }
 
-    function riskOracle_getLatestUpdateByType(string memory updateType)
-        public
-        checkExpectedErrors(RISK_ORACLE_GETTER_ERRORS)
-    {
-        (success, returnData) = address(riskOracle).call(abi.encodeCall(riskOracle.getLatestUpdateByType, updateType));
-    }
-
     function riskOracle_getAllUpdateTypes() public checkExpectedErrors(RISK_ORACLE_GETTER_ERRORS) {
         (success, returnData) = address(riskOracle).call(abi.encodeCall(riskOracle.getAllUpdateTypes, ()));
     }
 
-    function riskOracle_getLatestUpdateByParameterAndMarket(string memory updateType, bytes memory market)
+    function riskOracle_getLatestUpdateByParameterAndMarket(string memory updateType, address market)
         public
         checkExpectedErrors(RISK_ORACLE_GETTER_ERRORS)
     {

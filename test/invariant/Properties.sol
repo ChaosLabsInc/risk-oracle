@@ -54,12 +54,9 @@ abstract contract Properties is Asserts, BeforeAfter, PropertiesSpecifications {
 
     function invariant_update_counter_is_monotonically_increasing() public returns (bool) {
         // riskOracle_updateCounter should be equal to _before.riskOracle_updateCounter, if a function was called in the
-        // sequence that doesn't affect this state. Otherwise, the _after value should be at least equal to _before + 1 
+        // sequence that doesn't affect this state. Otherwise, the _after value should be at least equal to _before + 1
         // due to the updateCounter being incremented multiple times in the batch update call.
-        t(
-            _after.riskOracle_updateCounter >= _before.riskOracle_updateCounter,
-            UPDATE_COUNTER_03
-        );
+        t(_after.riskOracle_updateCounter >= _before.riskOracle_updateCounter, UPDATE_COUNTER_03);
 
         return true;
     }
