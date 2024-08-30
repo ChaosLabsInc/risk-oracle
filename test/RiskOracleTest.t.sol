@@ -30,6 +30,23 @@ contract RiskOracleTest is Test {
         assertTrue(riskOracle.isAuthorized(ANOTHER_AUTHORIZED_SENDER));
     }
 
+    function test_CannotSetDuplicateUpdateTypesInConstructor() public {
+        // Attempt to set duplicate update types in the constructor
+        string[] memory duplicateUpdateTypes = new string[](7);
+        duplicateUpdateTypes[0] = "Type1";
+        duplicateUpdateTypes[1] = "Type2";
+        duplicateUpdateTypes[2] = "Type1"; // Duplicate type
+        duplicateUpdateTypes[3] = "Type1"; // Duplicate type
+        duplicateUpdateTypes[4] = "Type2";
+        duplicateUpdateTypes[5] = "Type2";
+        duplicateUpdateTypes[6] = "Type3";
+
+        RiskOracleHarness oracle = new RiskOracleHarness(initialSenders, duplicateUpdateTypes);
+
+        // Check that only unique update types are stored
+        assertEq(oracle.getAllUpdateTypes().length, 3);
+    }
+
     function testFuzz_OwnerCanAddAuthorizedSender(address sender) public {
         // Fuzz test: owner adds a random authorized sender
         vm.assume(sender != AUTHORIZED_SENDER);
@@ -104,7 +121,7 @@ contract RiskOracleTest is Test {
 
     function testFuzz_OwnerCanAddUpdateType(string memory updateType) public {
         // Fuzz test: Owner adding a random update type
-        vm.assume(bytes(updateType).length <= 64);
+        vm.assume(bytes(updateType).length <= 64 && bytes(updateType).length > 0);
         vm.assume(
             keccak256(abi.encodePacked(updateType)) != keccak256(abi.encodePacked(initialUpdateTypes[0]))
                 && keccak256(abi.encodePacked(updateType)) != keccak256(abi.encodePacked(initialUpdateTypes[1]))
@@ -137,45 +154,6 @@ contract RiskOracleTest is Test {
         assertFalse(riskOracle.exposed_validUpdateTypes(updateType));
     }
 
-    /*function test_AuthorizedCanPublishRiskParameterUpdates() public {
-        bool isAuthorized = riskOracle.isAuthorized(AUTHORIZED_SENDER);
-        assertTrue(isAuthorized, "AUTHORIZED_SENDER should be authorized.");
-        string memory referenceId = "ref1";
-        string memory updateType = initialUpdateTypes[0];
-        bytes memory newValue = abi.encodePacked("newValue");
-        address market = makeAddr("market1");
-        bytes memory additionalData = abi.encodePacked("additionalData");
-
-        vm.prank(AUTHORIZED_SENDER);
-        vm.expectEmit(true, true, true, true);
-        emit RiskOracle.ParameterUpdated(
-            referenceId,
-            newValue,
-            "",
-            block.timestamp,
-            updateType,
-            riskOracle.updateCounter() + 1,
-            market,
-            additionalData
-        );
-        riskOracle.publishRiskParameterUpdate(
-            referenceId,
-            newValue,
-            updateType,
-            market,
-            additionalData
-        );
-
-        RiskOracle.RiskParameterUpdate memory update = riskOracle
-            .getLatestUpdateByParameterAndMarket(updateType, market);
-        assertEq(update.newValue, newValue);
-        assertEq(update.referenceId, referenceId);
-        assertEq(update.previousValue, "");
-        assertEq(update.updateType, updateType);
-        assertEq(update.updateId, riskOracle.updateCounter());
-        assertEq(update.market, market);
-        assertEq(update.additionalData, additionalData);
-    }*/
     function test_AuthorizedCanPublishRiskParameterUpdates() public {
         // Ensure AUTHORIZED_SENDER is actually authorized
         assertTrue(riskOracle.isAuthorized(AUTHORIZED_SENDER), "AUTHORIZED_SENDER should be authorized.");
