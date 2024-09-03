@@ -14,6 +14,7 @@ contract DeployRiskOracle is Script {
 
         // Set up initial authorized senders
         address[] memory initialSenders = new address[](1);
+        string memory description = "test";
         initialSenders[0] = 0xDBa8D5F693833f24CF4f9C716975BDAf6CEd0f15; // Replace with actual address
 
         // Set up initial update types
@@ -22,7 +23,7 @@ contract DeployRiskOracle is Script {
         initialUpdateTypes[1] = "maxOpenInterestForShorts";
 
         // Deploy the RiskOracle contract
-        RiskOracle riskOracle = new RiskOracle(initialSenders, initialUpdateTypes);
+        RiskOracle riskOracle = new RiskOracle(description, initialSenders, initialUpdateTypes);
 
         // Log the address of the deployed contract
         console.log("RiskOracle deployed at:", address(riskOracle));

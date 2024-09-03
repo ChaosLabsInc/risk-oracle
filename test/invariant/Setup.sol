@@ -13,12 +13,13 @@ abstract contract Setup is BaseSetup, PropertiesConstants {
     function setup() internal virtual override {
         address[] memory initialSenders = new address[](1);
         initialSenders[0] = USER1;
+        string memory description;
 
         string[] memory initialUpdateTypes = new string[](1); // the corresponding ghost variable is initialized to 1
         initialUpdateTypes[0] = "InitialUpdateType";
 
         // deploy as USER1 so they become both the owner and an authorized sender
         vm.prank(USER1);
-        riskOracle = new RiskOracleHarness(initialSenders, initialUpdateTypes);
+        riskOracle = new RiskOracleHarness(description, initialSenders, initialUpdateTypes);
     }
 }

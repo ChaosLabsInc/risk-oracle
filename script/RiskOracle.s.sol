@@ -18,14 +18,12 @@ contract DeployRiskOracle is Script {
 
         // Set up initial update types
         string[] memory initialUpdateTypes = new string[](2);
+        string memory description = "{risk oracle name}";
         initialUpdateTypes[0] = "Type1";
         initialUpdateTypes[1] = "Type2";
 
         // Deploy the RiskOracle contract
-        RiskOracle riskOracle = new RiskOracle(
-            initialSenders,
-            initialUpdateTypes
-        );
+        RiskOracle riskOracle = new RiskOracle(description, initialSenders, initialUpdateTypes);
 
         // Log the address of the deployed contract
         console.log("RiskOracle deployed at:", address(riskOracle));

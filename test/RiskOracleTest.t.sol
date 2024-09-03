@@ -7,6 +7,7 @@ import "./RiskOracleHarness.sol";
 contract RiskOracleTest is Test {
     RiskOracleHarness public riskOracle;
 
+    string public description = "test contract";
     address public OWNER = makeAddr("Owner");
     address public NOT_OWNER = makeAddr("Not Owner");
     address public AUTHORIZED_SENDER = makeAddr("Authorized Sender");
@@ -20,7 +21,7 @@ contract RiskOracleTest is Test {
     function setUp() public {
         // Set up the risk oracle with initial settings
         vm.prank(OWNER);
-        riskOracle = new RiskOracleHarness(initialSenders, initialUpdateTypes);
+        riskOracle = new RiskOracleHarness(description, initialSenders, initialUpdateTypes);
     }
 
     function test_OwnerCanAddAuthorizedSender() public {
@@ -41,7 +42,7 @@ contract RiskOracleTest is Test {
         duplicateUpdateTypes[5] = "Type2";
         duplicateUpdateTypes[6] = "Type3";
 
-        RiskOracleHarness oracle = new RiskOracleHarness(initialSenders, duplicateUpdateTypes);
+        RiskOracleHarness oracle = new RiskOracleHarness(description, initialSenders, duplicateUpdateTypes);
 
         // Check that only unique update types are stored
         assertEq(oracle.getAllUpdateTypes().length, 3);

@@ -19,7 +19,6 @@ contract RiskOracle is Ownable {
         bytes additionalData; // Additional data for the update
     }
 
-    RiskParameterUpdate[] internal updateHistory; // Stores all historical updates
     string[] private allUpdateTypes; // Array to store all update types
     mapping(string => bool) internal validUpdateTypes; // Whitelist of valid update type identifiers
     mapping(uint256 => RiskParameterUpdate) private updatesById; // Mapping from unique update ID to the update details
@@ -28,6 +27,7 @@ contract RiskOracle is Ownable {
     mapping(address => mapping(string => uint256))
         public latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
     uint256 public updateCounter; // Counter to keep track of the total number of updates
+    string public description; // Description of contract
 
     event ParameterUpdated(
         string referenceId,
@@ -62,13 +62,16 @@ contract RiskOracle is Ownable {
 
     /**
      * @notice Constructor to set initial authorized addresses and approved update types.
+     * @param _description Description of contract
      * @param initialSenders List of addresses that will initially be authorized to perform updates.
      * @param initialUpdateTypes List of valid update types initially allowed.
      */
     constructor(
+        string memory _description,
         address[] memory initialSenders,
         string[] memory initialUpdateTypes
     ) Ownable(msg.sender) {
+        description = _description;
         for (uint256 i = 0; i < initialSenders.length; i++) {
             authorizedSenders[initialSenders[i]] = true; // Automatically authorize initial senders
         }
@@ -132,7 +135,6 @@ contract RiskOracle is Ownable {
         address market,
         bytes memory additionalData
     ) external onlyAuthorized {
-        require(validUpdateTypes[updateType], "Unauthorized update type.");
         _processUpdate(
             referenceId,
             newValue,
@@ -158,18 +160,7 @@ contract RiskOracle is Ownable {
         address[] memory markets,
         bytes[] memory additionalData
     ) external onlyAuthorized {
-        require(
-            referenceIds.length == newValues.length &&
-                newValues.length == updateTypes.length &&
-                updateTypes.length == markets.length &&
-                markets.length == additionalData.length,
-            "Mismatch between argument array lengths."
-        );
         for (uint256 i = 0; i < referenceIds.length; i++) {
-            require(
-                validUpdateTypes[updateTypes[i]],
-                "Unauthorized update type at index"
-            );
             _processUpdate(
                 referenceIds[i],
                 newValues[i],
@@ -190,13 +181,12 @@ contract RiskOracle is Ownable {
         address market,
         bytes memory additionalData
     ) internal {
+        require(validUpdateTypes[updateType], "Unauthorized update type.");
         updateCounter++;
         uint256 previousUpdateId = latestUpdateIdByMarketAndType[market][
             updateType
         ];
-        bytes memory previousValue = previousUpdateId > 0
-            ? updatesById[previousUpdateId].newValue
-            : bytes("");
+        bytes memory previousValue = updatesById[previousUpdateId].newValue;
 
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
             block.timestamp,
@@ -209,7 +199,6 @@ contract RiskOracle is Ownable {
             additionalData
         );
         updatesById[updateCounter] = newUpdate;
-        updateHistory.push(newUpdate);
 
         // Update the latest update ID for the market and updateType combination
         latestUpdateIdByMarketAndType[market][updateType] = updateCounter;
