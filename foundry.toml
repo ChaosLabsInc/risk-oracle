@@ -10,3 +10,6 @@ remappings = ["@chimera/=lib/chimera/src/", "@crytic/=lib/properties/contracts"]
 optimizer = true
 optimizer_runs = 200
 coverage = true
+
+[invariant]
+runs = 0

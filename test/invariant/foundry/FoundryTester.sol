@@ -16,15 +16,8 @@ contract FoundryTester is Test, PropertiesSpecifications {
 
     function invariant() public {
         assertTrue(handler.invariant_no_duplicated_update_types());
-        assertTrue(
-            handler
-                .invariant_valid_update_types_mapping_mirrors_all_update_types_array()
-        );
-        assertTrue(
-            handler.invariant_update_counter_should_equal_number_of_updates()
-        );
-        assertTrue(
-            handler.invariant_update_counter_is_monotonically_increasing()
-        );
+        assertTrue(handler.invariant_valid_update_types_mapping_mirrors_all_update_types_array());
+        assertTrue(handler.invariant_update_counter_should_equal_number_of_updates());
+        assertTrue(handler.invariant_update_counter_is_monotonically_increasing());
     }
 }
