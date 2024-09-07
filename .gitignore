@@ -30,7 +30,3 @@ script/*
 crytic-export/
 medusa/
 echidna/
-
-echidna-assertion.yaml
-echidna-property.yaml
-medusa.json

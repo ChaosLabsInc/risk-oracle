@@ -20,8 +20,6 @@ contract CryticToFoundry is Test, TargetFunctions, FoundryAsserts {
         setup();
 
         msgSender = USER1;
-
-        targetContract(address(riskOracle));
     }
 
     function _setUp(address _user, uint256 _time, uint256 _block) internal {
