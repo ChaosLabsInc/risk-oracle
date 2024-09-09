@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
- * @title Dynamic Risk Oracle
+ * @title Risk Oracle
+ * @author Chaos Labs
  */
 contract RiskOracle is Ownable {
     struct RiskParameterUpdate {

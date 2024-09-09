@@ -24,9 +24,10 @@ report.md
 script/*
 
 # Unignore the specific file
-!script/script/RiskOracle.s.sol
+!script/script/DeployRiskOracle.s.sol
 
 # crytic
 crytic-export/
 medusa/
 echidna/
+
