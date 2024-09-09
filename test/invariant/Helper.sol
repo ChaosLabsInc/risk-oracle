@@ -14,6 +14,7 @@ abstract contract Helper is Asserts, Bounds, Setup {
     address internal msgSender;
     string[] internal updateTypes;
     EnumerableSet.AddressSet internal authorizedSenders;
+
     modifier getMsgSender() virtual {
         msgSender = msg.sender;
         _;
@@ -50,6 +51,7 @@ abstract contract Helper is Asserts, Bounds, Setup {
     function _addUpdateType(string memory updateType) internal {
         updateTypes.push(updateType);
     }
+
     function _updatesEq(RiskOracle.RiskParameterUpdate memory update1, RiskOracle.RiskParameterUpdate memory update2)
         internal
         pure
