@@ -377,7 +377,7 @@ contract RiskOracleTest is Test {
         assertEq(update.additionalData, additionalData[0]);
     }
 
-    function test_PublishBulkRiskParameterUpdatesMultipleSameUpdateType() public {
+    function test_PublishBulkRiskParameterUpdatesMultipleSameUpdateTypeAndMarket() public {
         string[] memory referenceIds = new string[](2);
         referenceIds[0] = "ref1";
         referenceIds[1] = "ref2";
