@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
- * @title Dynamic Risk Oracle
+ * @title Risk Oracle
+ * @author Chaos Labs
  */
 contract RiskOracle is Ownable {
     struct RiskParameterUpdate {
@@ -15,18 +16,18 @@ contract RiskOracle is Ownable {
         bytes previousValue; // Previous value of the parameter for historical comparison
         string updateType; // Classification of the update for validation purposes
         uint256 updateId; // Unique identifier for this specific update
-        bytes market; // Unique identifier for market of the parameter update
+        address market; // Address for market of the parameter update
         bytes additionalData; // Additional data for the update
     }
 
-    RiskParameterUpdate[] internal updateHistory; // Stores all historical updates
     string[] private allUpdateTypes; // Array to store all update types
     mapping(string => bool) internal validUpdateTypes; // Whitelist of valid update type identifiers
     mapping(uint256 => RiskParameterUpdate) private updatesById; // Mapping from unique update ID to the update details
     mapping(address => bool) private authorizedSenders; // Authorized accounts capable of executing updates
 
-    mapping(bytes => mapping(string => uint256)) public latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
+    mapping(address => mapping(string => uint256)) public latestUpdateIdByMarketAndType; // Mapping to store the latest update ID for each combination of market and update type
     uint256 public updateCounter; // Counter to keep track of the total number of updates
+    string public description; // Description of contract
 
     event ParameterUpdated(
         string referenceId,
@@ -35,7 +36,7 @@ contract RiskOracle is Ownable {
         uint256 timestamp,
         string indexed updateType,
         uint256 indexed updateId,
-        bytes indexed market,
+        address indexed market,
         bytes additionalData
     );
 
@@ -48,20 +49,31 @@ contract RiskOracle is Ownable {
         _;
     }
 
+    modifier onlyValidString(string memory input) {
+        require(bytes(input).length > 0 && bytes(input).length <= 64, "Invalid update type string");
+        _;
+    }
+
     /**
      * @notice Constructor to set initial authorized addresses and approved update types.
+     * @param _description Description of contract
      * @param initialSenders List of addresses that will initially be authorized to perform updates.
      * @param initialUpdateTypes List of valid update types initially allowed.
      */
-    constructor(address[] memory initialSenders, string[] memory initialUpdateTypes) Ownable(msg.sender) {
+    constructor(string memory _description, address[] memory initialSenders, string[] memory initialUpdateTypes)
+        Ownable(msg.sender)
+    {
+        description = _description;
         for (uint256 i = 0; i < initialSenders.length; i++) {
             authorizedSenders[initialSenders[i]] = true; // Automatically authorize initial senders
         }
         for (uint256 i = 0; i < initialUpdateTypes.length; i++) {
-            validUpdateTypes[initialUpdateTypes[i]] = true; // Register initial valid updates
-            allUpdateTypes.push(initialUpdateTypes[i]);
+            if (!validUpdateTypes[initialUpdateTypes[i]]) {
+                // Ensure no duplicate updateTypes can be set
+                validUpdateTypes[initialUpdateTypes[i]] = true; // Register initial valid updates
+                allUpdateTypes.push(initialUpdateTypes[i]);
+            }
         }
-        updateCounter = 0; // Initialize the update counter
     }
 
     /**
@@ -88,7 +100,7 @@ contract RiskOracle is Ownable {
      * @notice Adds a new type of update to the list of authorized update types.
      * @param newUpdateType New type of update to allow.
      */
-    function addUpdateType(string memory newUpdateType) external onlyOwner {
+    function addUpdateType(string memory newUpdateType) external onlyOwner onlyValidString(newUpdateType) {
         require(!validUpdateTypes[newUpdateType], "Update type already exists.");
         validUpdateTypes[newUpdateType] = true;
         allUpdateTypes.push(newUpdateType);
@@ -100,17 +112,16 @@ contract RiskOracle is Ownable {
      * @param referenceId An external reference ID associated with the update.
      * @param newValue The new value of the risk parameter being updated.
      * @param updateType Type of update performed, must be previously authorized.
-     * @param market Unique identifier for market of the parameter update
+     * @param market Address for market of the parameter update
      * @param additionalData Additional data for the update
      */
     function publishRiskParameterUpdate(
         string memory referenceId,
         bytes memory newValue,
         string memory updateType,
-        bytes memory market,
+        address market,
         bytes memory additionalData
     ) external onlyAuthorized {
-        require(validUpdateTypes[updateType], "Unauthorized update type.");
         _processUpdate(referenceId, newValue, updateType, market, additionalData);
     }
 
@@ -119,7 +130,7 @@ contract RiskOracle is Ownable {
      * @param referenceIds Array of external reference IDs.
      * @param newValues Array of new values for each update.
      * @param updateTypes Array of types for each update, all must be authorized.
-     * @param markets Array of unique identifiers for markets of the parameter updates
+     * @param markets Array of addresses for markets of the parameter updates
      * @param additionalData Array of additional data for the updates
      *
      */
@@ -127,16 +138,10 @@ contract RiskOracle is Ownable {
         string[] memory referenceIds,
         bytes[] memory newValues,
         string[] memory updateTypes,
-        bytes[] memory markets,
+        address[] memory markets,
         bytes[] memory additionalData
     ) external onlyAuthorized {
-        require(
-            referenceIds.length == newValues.length && newValues.length == updateTypes.length
-                && updateTypes.length == markets.length && markets.length == additionalData.length,
-            "Mismatch between argument array lengths."
-        );
         for (uint256 i = 0; i < referenceIds.length; i++) {
-            require(validUpdateTypes[updateTypes[i]], "Unauthorized update type at index");
             _processUpdate(referenceIds[i], newValues[i], updateTypes[i], markets[i], additionalData[i]);
         }
     }
@@ -148,18 +153,18 @@ contract RiskOracle is Ownable {
         string memory referenceId,
         bytes memory newValue,
         string memory updateType,
-        bytes memory market,
+        address market,
         bytes memory additionalData
     ) internal {
+        require(validUpdateTypes[updateType], "Unauthorized update type.");
         updateCounter++;
         uint256 previousUpdateId = latestUpdateIdByMarketAndType[market][updateType];
-        bytes memory previousValue = previousUpdateId > 0 ? updatesById[previousUpdateId].newValue : bytes("");
+        bytes memory previousValue = updatesById[previousUpdateId].newValue;
 
         RiskParameterUpdate memory newUpdate = RiskParameterUpdate(
             block.timestamp, newValue, referenceId, previousValue, updateType, updateCounter, market, additionalData
         );
         updatesById[updateCounter] = newUpdate;
-        updateHistory.push(newUpdate);
 
         // Update the latest update ID for the market and updateType combination
         latestUpdateIdByMarketAndType[market][updateType] = updateCounter;
@@ -167,20 +172,6 @@ contract RiskOracle is Ownable {
         emit ParameterUpdated(
             referenceId, newValue, previousValue, block.timestamp, updateType, updateCounter, market, additionalData
         );
-    }
-
-    /**
-     * @notice Retrieves the most recent update for a given update type.
-     * @param updateType The specific type of update to retrieve.
-     * @return The most recent RiskParameterUpdate of the specified type.
-     */
-    function getLatestUpdateByType(string memory updateType) external view returns (RiskParameterUpdate memory) {
-        for (uint256 i = updateHistory.length; i > 0; i--) {
-            if (Strings.equal(updateHistory[i - 1].updateType, updateType)) {
-                return updateHistory[i - 1];
-            }
-        }
-        revert("No updates found for the specified type.");
     }
 
     function getAllUpdateTypes() external view returns (string[] memory) {
@@ -193,7 +184,7 @@ contract RiskOracle is Ownable {
      * @param market The market identifier.
      * @return The most recent RiskParameterUpdate for the specified parameter and market.
      */
-    function getLatestUpdateByParameterAndMarket(string memory updateType, bytes memory market)
+    function getLatestUpdateByParameterAndMarket(string memory updateType, address market)
         external
         view
         returns (RiskParameterUpdate memory)

@@ -3,12 +3,7 @@ cache/
 out/
 
 # Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
-
-# Docs
-docs/
+/broadcast/*
 
 # Dotenv file
 .env
@@ -25,9 +20,9 @@ script/*
 
 # Unignore the specific file
 !script/script/DeployRiskOracle.s.sol
-!script/script/RiskOracle.s.sol
 
 # crytic
 crytic-export/
 medusa/
 echidna/
+
