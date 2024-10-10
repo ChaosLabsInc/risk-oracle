@@ -72,6 +72,7 @@ contract RiskOracle is Ownable {
                 // Ensure no duplicate updateTypes can be set
                 validUpdateTypes[initialUpdateTypes[i]] = true; // Register initial valid updates
                 allUpdateTypes.push(initialUpdateTypes[i]);
+                emit UpdateTypeAdded(initialUpdateTypes[i]);
             }
         }
     }
