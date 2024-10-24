@@ -1,4 +1,4 @@
-# Chaos Labs Risk Oracle
+# Edge Risk Oracle by Chaos Labs
 
 The Chaos Labs Risk Oracle is a smart contract that serves as a dynamic oracle for risk parameters. It allows authorized senders to publish and update risk parameters, which can be queried by other contracts or off-chain systems.
 
